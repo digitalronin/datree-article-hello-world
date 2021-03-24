@@ -19,7 +19,7 @@ jobs:
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: eu-west-2
+          region: us-west-2
           local-image: foo
           image: ${{ secrets.ECR_NAME }}:${{ github.sha }}
       - name: Update image tag
