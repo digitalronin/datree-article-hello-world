@@ -8,6 +8,7 @@ on:
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ECR_NAME: helloworld
   ECR_URL: 351222107032.dkr.ecr.us-west-2.amazonaws.com/helloworld
   CLUSTER: datree-demo
   CLUSTER_URL: https://7E980DD33204F2ECCED48D257ED048AB.gr7.us-west-2.eks.amazonaws.com
@@ -29,7 +30,7 @@ jobs:
           secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           region: us-west-2
           local-image: foo
-          image: ${ECR_URL}:${{ github.sha }}
+          image: ${ECR_NAME}:${{ github.sha }}
       - name: Update image tag
         run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes-deploy.tpl | envsubst > kubernetes-deploy.yaml
       - name: Authenticate to the cluster
