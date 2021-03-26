@@ -13,6 +13,7 @@ env:
   CLUSTER: datree-demo
   CLUSTER_URL: https://7E980DD33204F2ECCED48D257ED048AB.gr7.us-west-2.eks.amazonaws.com
   KUBE_CERT: ${{ secrets.KUBE_CERT }}
+  KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
 
 jobs:
   main:
@@ -33,10 +34,13 @@ jobs:
           image: ${ECR_NAME}:${{ github.sha }}
       - name: Update image tag
         run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes-deploy.tpl | envsubst > kubernetes-deploy.yaml
-      - name: Create kubeconfig file
+      - name: Authenticate to the cluster
         run: |
-          mkdir ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          echo "${KUBE_CERT}" > ca.crt
+          kubectl config set-cluster ${CLUSTER} --certificate-authority=./ca.crt --server=${CLUSTER_URL}
+          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
+          kubectl config set-context ${CLUSTER} --cluster=${CLUSTER} --user=deploy-user
+          kubectl config use-context ${CLUSTER}
       - name: Apply the updated manifest
         run: |
           kubectl apply -f kubernetes-deploy.yaml
