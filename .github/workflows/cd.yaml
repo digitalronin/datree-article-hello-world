@@ -5,6 +5,14 @@ on:
     branches:
       - 'main'
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ECR_URL: 351222107032.dkr.ecr.us-west-2.amazonaws.com/helloworld
+  CLUSTER: datree-demo
+  CLUSTER_URL: https://7E980DD33204F2ECCED48D257ED048AB.gr7.us-west-2.eks.amazonaws.com
+  KUBE_CERT: ${{ secrets.KUBE_CERT }}
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -17,24 +25,19 @@ jobs:
         id: ecr
         uses: jwalton/gh-ecr-push@v1
         with:
-          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          access-key-id: ${AWS_ACCESS_KEY_ID}
+          secret-access-key: ${AWS_SECRET_ACCESS_KEY}
           region: us-west-2
           local-image: foo
-          image: ${{ secrets.ECR_NAME }}:${{ github.sha }}
+          image: ${ECR_URL}:${{ github.sha }}
       - name: Update image tag
-        env:
-          ECR_URL: ${{ secrets.ECR_URL }}
         run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes-deploy.tpl | envsubst > kubernetes-deploy.yaml
       - name: Authenticate to the cluster
-        env:
-          KUBE_CLUSTER: ${{ secrets.KUBE_CLUSTER }}
         run: |
-          echo "${{ secrets.KUBE_CERT }}" > ca.crt
-          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://api.${KUBE_CLUSTER}
-          kubectl config set-credentials deploy-user --token=${{ secrets.KUBE_TOKEN }}
-          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user
-          kubectl config use-context ${KUBE_CLUSTER}
+          echo "${KUBE_CERT}" > ca.crt
+          kubectl config set-cluster ${CLUSTER} --certificate-authority=./ca.crt --server=https://${CLUSTER_URL}
+          kubectl config set-context ${CLUSTER} --cluster=${CLUSTER} --user=deploy-user
+          kubectl config use-context ${CLUSTER}
       - name: Apply the updated manifest
         run: |
           kubectl apply -f kubernetes-deploy.yaml
