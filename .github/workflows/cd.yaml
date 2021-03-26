@@ -33,12 +33,8 @@ jobs:
           image: ${ECR_NAME}:${{ github.sha }}
       - name: Update image tag
         run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes-deploy.tpl | envsubst > kubernetes-deploy.yaml
-      - name: Authenticate to the cluster
-        run: |
-          echo "${KUBE_CERT}" > ca.crt
-          kubectl config set-cluster ${CLUSTER} --client-ca-file=./ca.crt --server=https://${CLUSTER_URL}
-          kubectl config set-context ${CLUSTER} --cluster=${CLUSTER}
-          kubectl config use-context ${CLUSTER}
+      - name: Create kubeconfig file
+        run: echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
       - name: Apply the updated manifest
         run: |
           kubectl apply -f kubernetes-deploy.yaml
