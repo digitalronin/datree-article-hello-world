@@ -9,9 +9,9 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   ECR_NAME: helloworld
-  ECR_URL: 351222107032.dkr.ecr.us-west-2.amazonaws.com/helloworld
+  ECR_URL: ${{ secrets.ECR_URL }}
   CLUSTER: datree-demo
-  CLUSTER_URL: https://7E980DD33204F2ECCED48D257ED048AB.gr7.us-west-2.eks.amazonaws.com
+  CLUSTER_URL: ${{ secrets.CLUSTER_URL }}
   KUBE_CERT: ${{ secrets.KUBE_CERT }}
   KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
 
@@ -42,5 +42,4 @@ jobs:
           kubectl config set-context ${CLUSTER} --cluster=${CLUSTER} --user=deploy-user
           kubectl config use-context ${CLUSTER}
       - name: Apply the updated manifest
-        run: |
-          kubectl apply -f kubernetes-deploy.yaml
+        run: kubectl apply -f kubernetes-deploy.yaml
