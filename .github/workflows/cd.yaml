@@ -34,7 +34,9 @@ jobs:
       - name: Update image tag
         run: export IMAGE_TAG=${{ github.sha }} && cat kubernetes-deploy.tpl | envsubst > kubernetes-deploy.yaml
       - name: Create kubeconfig file
-        run: echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        run: |
+          mkdir ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
       - name: Apply the updated manifest
         run: |
           kubectl apply -f kubernetes-deploy.yaml
